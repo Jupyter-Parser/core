@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jupyter_convert_core"
+version = "0.0.1"
+authors = [
+  { name="Trepalin Alexandr", email="atrepalin19@gmail.com" },
+]
+description = "Core lib for jupyter files conversion"
+requires-python = ">=3.8"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
