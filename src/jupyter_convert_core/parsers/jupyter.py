@@ -1,6 +1,7 @@
 from typing import List
 from ..types import Cell, CellType, OutputType, Output
 import base64
+from .markdown import parse_markdown
 
 
 def parse_jupyter(data: dict):
@@ -16,6 +17,7 @@ def parse_jupyter(data: dict):
         match cell["cell_type"]:
             case "markdown":
                 cell_type = CellType.markdown
+                source = parse_markdown(source)
             case "code":
                 cell_type = CellType.code
 

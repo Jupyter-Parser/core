@@ -1,1 +1,2 @@
-from Cell import *
+from .Cell import *
+from .Elements import *
