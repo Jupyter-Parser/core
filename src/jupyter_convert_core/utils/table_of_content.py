@@ -9,7 +9,7 @@ def add_toc(
     heading: str | None = None,
     heading_level: int | None = 1,
     heading_style: ParagraphStyle | None = None,
-    levels: tuple[int, int] = (1, 3)
+    levels: tuple[int, int] = (1, 3),
 ):
     document.add_page_break()
 
@@ -27,7 +27,7 @@ def add_toc(
 
     instrText = OxmlElement("w:instrText")
     instrText.set(qn("xml:space"), "preserve")
-    instrText.text = f"TOC \\o {levels[0]}-{levels[1]}' \\h \\z \\u"
+    instrText.text = f'TOC \\o "{levels[0]}-{levels[1]}" \\h \\z \\u'
 
     fldChar2 = OxmlElement("w:fldChar")
     fldChar2.set(qn("w:fldCharType"), "separate")

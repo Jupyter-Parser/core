@@ -44,16 +44,8 @@ def parse_jupyter(data: dict):
                         if "image/png" in data:
                             image = base64.b64decode(data["image/png"])
 
-                outputs.append(Output(
-                    output_type=output_type,
-                    text=text,
-                    image=image
-                ))
+                outputs.append(Output(output_type=output_type, text=text, image=image))
 
-        cells.append(Cell(
-            cell_type=cell_type,
-            source=source,
-            outputs=outputs
-        ))
+        cells.append(Cell(cell_type=cell_type, source=source, outputs=outputs))
 
     return cells

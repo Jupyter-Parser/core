@@ -62,16 +62,13 @@ def walk(element: Element) -> ParsedElement:
             return
         case marko.block.List:
             elem = MdList(
-                bullet=element.bullet,
-                ordered=element.ordered,
-                start=element.start
+                bullet=element.bullet, ordered=element.ordered, start=element.start
             )
         case marko.block.ListItem:
             elem = MdListItem()
         case marko.block.Heading:
             elem = MdHeading(level=element.level)
-        case marko.inline.Link | \
-                marko.ext.gfm.elements.Url:
+        case marko.inline.Link | marko.ext.gfm.elements.Url:
             elem = MdLink(source=element.dest)
         case marko.ext.gfm.elements.Paragraph:
             elem = MdParagraph()
@@ -85,9 +82,7 @@ def walk(element: Element) -> ParsedElement:
             return MdCode(children=element.children)
         case marko.block.CodeBlock | marko.block.FencedCode:
             elem = MdCode(lang=element.lang)
-        case marko.inline.Literal | \
-                marko.inline.RawText | \
-                marko.inline.Literal:
+        case marko.inline.Literal | marko.inline.RawText | marko.inline.Literal:
             return element.children
         case builtins.str:
             return element
@@ -100,10 +95,7 @@ def walk(element: Element) -> ParsedElement:
         case marko.ext.gfm.elements.TableRow:
             elem = MdTableRow()
         case marko.ext.gfm.elements.TableCell:
-            elem = MdTableCell(
-                align=element.align,
-                header=element.header
-            )
+            elem = MdTableCell(align=element.align, header=element.header)
         case marko.block.HTMLBlock:
             tree = get_tree(md(element.body))
             return walk(tree)

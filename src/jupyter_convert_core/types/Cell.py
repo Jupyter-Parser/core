@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
+from .Elements import MdDocument
 
 
 class CellType(Enum):
@@ -23,5 +24,5 @@ class Output:
 @dataclass
 class Cell:
     cell_type: CellType
-    source: str
+    source: str | MdDocument
     outputs: List[Output]
