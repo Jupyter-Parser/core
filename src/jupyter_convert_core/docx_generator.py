@@ -22,7 +22,11 @@ def scale_picture(picture: InlineShape, new_width):
     picture.height = int(aspect_ratio * new_width)
 
 
-def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
+def generate_document(
+        cells: List[Cell], 
+        generate_toc: bool = False,
+        cwd: str = ""
+) -> bytes:
     document = Document()
 
     section = document.sections[0]
@@ -37,6 +41,7 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
     latex_style = styles.add_style("Latex", WD_STYLE_TYPE.CHARACTER)
     quote_style = styles.add_style("Цитата", WD_STYLE_TYPE.PARAGRAPH)
     code_style = styles.add_style("Код", WD_STYLE_TYPE.PARAGRAPH)
+    character_code_style = styles.add_style("Код (символы)", WD_STYLE_TYPE.CHARACTER)
     code_output_style = styles.add_style("Вывод", WD_STYLE_TYPE.PARAGRAPH)
     toc_style = styles.add_style("Оглавление", WD_STYLE_TYPE.PARAGRAPH)
 
@@ -54,6 +59,7 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
                 if output.text:
                     try:
                         run.add_text(output.text)
+                        run.add_break()
                     except:
                         pass
                 if output.image:
@@ -63,10 +69,19 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
         elif cell.cell_type == CellType.markdown:
             root: MdDocument = cell.source
 
-            def add_text(children: List[Element], run: Run):
+            def add_text(children: List[Element], paragraph: Paragraph, italic=False, bold=False):
                 for element in children:
                     if type(element) == str:
+                        run: Run = paragraph.add_run()
+                        run.bold = bold
+                        run.italic = italic
                         run.add_text(element)
+                    elif type(element) == tp.MdCode:
+                        run: Run = paragraph.add_run()
+                        run.bold = bold
+                        run.italic = italic
+                        run.style = character_code_style
+                        run.add_text(element.children)
                     else:
                         walk(element)
 
@@ -78,17 +93,17 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
                         case builtins.str:
                             paragraph.add_run(element)
                         case tp.MdEmphasis:
-                            run: Run = paragraph.add_run()
-                            run.italic = True
-                            add_text(element.children, run)
+                            add_text(element.children, paragraph, italic=True)
                         case tp.MdStrongEmphasis:
-                            run: Run = paragraph.add_run()
-                            run.bold = True
-                            add_text(element.children, run)
+                            add_text(element.children, paragraph, bold=True)
                         case tp.MdLatex:
                             run: Run = paragraph.add_run()
                             run.style = latex_style
                             run.add_text(element.latex)
+                        case tp.MdCode:
+                            run: Run = paragraph.add_run()
+                            run.style = character_code_style
+                            run.add_text(element.children)
                         case tp.MdLink:
                             run: Run = paragraph.add_run()
 
@@ -103,6 +118,8 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
                             walk(element, level, prev)
 
             def walk(element: Element, level=0, prev=None):
+                if not element:
+                    return
                 match type(element):
                     case tp.MdHeading:
                         level = element.level
@@ -119,7 +136,13 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
                         add_runs(element.children, p)
                     case tp.MdImage:
                         try:
-                            img = requests.get(element.source).content
+                            src = element.source
+
+                            if "http://" in src or "https://" in src:
+                                img = requests.get(src).content
+                            else:
+                                img = open(f"{cwd}/{src}", "rb").read()
+
                             picture = document.add_picture(BytesIO(img))
                             if picture.width > max_picture_width:
                                 scale_picture(picture, max_picture_width)
@@ -181,7 +204,7 @@ def generate_document(cells: List[Cell], generate_toc: bool = False) -> bytes:
                                         p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
                                     case "center":
                                         p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
+                                
                                 add_runs(c.children, p)
                     case _:
                         p = document.add_paragraph()
