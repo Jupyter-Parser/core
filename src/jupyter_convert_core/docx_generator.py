@@ -5,12 +5,13 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shape import InlineShape
 from docx.table import Table
 from docx.text.paragraph import Run, Paragraph
+
 from .utils.table_of_content import add_toc
 from .utils.add_link import add_hyperlink
 from .types.Elements import Element, MdDocument
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from . import types as tp
-from .types import Cell, CellType
+from .types import Cell, CellType, Section
 from io import BytesIO
 import requests
 from haggis.files.docx import list_number
@@ -23,17 +24,24 @@ def scale_picture(picture: InlineShape, new_width):
 
 
 def generate_document(
-        cells: List[Cell], 
-        generate_toc: bool = False,
-        cwd: str = ""
+    cells: List[Cell],
+    generate_toc: bool = False,
+    cwd: str = "",
+    section_opts: Section = Section()
 ) -> bytes:
     document = Document()
 
+    max_picture_width = section_opts.width - \
+        (section_opts.left + section_opts.right)
+
     section = document.sections[0]
 
-    max_picture_width = section.page_width - (
-        section.left_margin + section.right_margin
-    )
+    section.page_width = section_opts.width
+    section.page_height = section_opts.height
+    section.top_margin = section_opts.top
+    section.right_margin = section_opts.right
+    section.bottom_margin = section_opts.bottom
+    section.left_margin = section_opts.left
 
     styles = document.styles
 
@@ -41,7 +49,8 @@ def generate_document(
     latex_style = styles.add_style("Latex", WD_STYLE_TYPE.CHARACTER)
     quote_style = styles.add_style("Цитата", WD_STYLE_TYPE.PARAGRAPH)
     code_style = styles.add_style("Код", WD_STYLE_TYPE.PARAGRAPH)
-    character_code_style = styles.add_style("Код (символы)", WD_STYLE_TYPE.CHARACTER)
+    character_code_style = styles.add_style(
+        "Код (символы)", WD_STYLE_TYPE.CHARACTER)
     code_output_style = styles.add_style("Вывод", WD_STYLE_TYPE.PARAGRAPH)
     toc_style = styles.add_style("Оглавление", WD_STYLE_TYPE.PARAGRAPH)
 
@@ -204,7 +213,7 @@ def generate_document(
                                         p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
                                     case "center":
                                         p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                                
+
                                 add_runs(c.children, p)
                     case _:
                         p = document.add_paragraph()
