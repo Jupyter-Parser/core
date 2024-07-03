@@ -32,8 +32,8 @@ def generate_document(
 ) -> bytes:
     document = Document()
 
-    max_picture_width = section_opts.width - \
-        (section_opts.left + section_opts.right)
+    max_picture_width = Mm(section_opts.width -
+                           (section_opts.left + section_opts.right))
 
     section = document.sections[0]
 
