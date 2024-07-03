@@ -10,6 +10,7 @@ from .utils.table_of_content import add_toc
 from .utils.add_link import add_hyperlink
 from .types.Elements import Element, MdDocument
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Mm
 from . import types as tp
 from .types import Cell, CellType, Section
 from io import BytesIO
@@ -36,12 +37,12 @@ def generate_document(
 
     section = document.sections[0]
 
-    section.page_width = section_opts.width
-    section.page_height = section_opts.height
-    section.top_margin = section_opts.top
-    section.right_margin = section_opts.right
-    section.bottom_margin = section_opts.bottom
-    section.left_margin = section_opts.left
+    section.page_width = Mm(section_opts.width)
+    section.page_height = Mm(section_opts.height)
+    section.top_margin = Mm(section_opts.top)
+    section.right_margin = Mm(section_opts.right)
+    section.bottom_margin = Mm(section_opts.bottom)
+    section.left_margin = Mm(section_opts.left)
 
     styles = document.styles
 
