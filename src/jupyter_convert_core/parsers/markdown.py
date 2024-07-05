@@ -26,6 +26,7 @@ from ..types import (
     MdTableRow,
 )
 from markdownify import markdownify as md
+from marko.ext.gfm import GFM
 
 
 class Latex(InlineElement):
@@ -43,7 +44,7 @@ class RawMixin:
 
 RawExtension = MarkoExtension(elements=[Latex], renderer_mixins=[RawMixin])
 
-markdown = Markdown(extensions=[RawExtension, "gfm"])
+markdown = Markdown(extensions=[RawExtension, GFM])
 
 
 def get_tree(text: str) -> Document:
